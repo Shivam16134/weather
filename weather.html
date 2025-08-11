@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <title>मौसम दर्शन</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- CSS -->
+  <style>
+    :root{
+      --bg-grad:linear-gradient(135deg,#74ebd5 0%, #ACB6E5 100%);
+      --card-bg:#ffffff30;
+      --text:#fff;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+    body{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--bg-grad);
+      transition:background 1s;
+    }
+
+    .container{
+      width:90%;
+      max-width:450px;
+      text-align:center;
+      color:var(--text);
+    }
+
+    .search-box{
+      display:flex;
+      justify-content:center;
+      margin-bottom:2rem;
+    }
+
+    .search-box input{
+      flex:1;
+      max-width:300px;
+      padding:.8rem 1.2rem;
+      border:none;
+      border-radius:30px 0 0 30px;
+      outline:none;
+      font-size:1rem;
+    }
+
+    .search-box button{
+      padding:.8rem 1.2rem;
+      border:none;
+      background:#fff;
+      border-radius:0 30px 30px 0;
+      cursor:pointer;
+      transition:.3s;
+    }
+
+    .search-box button:hover{
+      background:#f1f1f1;
+    }
+
+    .weather-card{
+      background:var(--card-bg);
+      border-radius:20px;
+      padding:2.5rem 1.5rem;
+      backdrop-filter:blur(10px);
+      box-shadow:0 10px 25px rgba(0,0,0,.1);
+      animation:fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(-20px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    .weather-icon img{
+      width:120px;
+      margin-bottom:.5rem;
+    }
+
+    .temp{
+      font-size:4rem;
+      font-weight:600;
+      margin-bottom:.5rem;
+    }
+
+    .city{
+      font-size:1.5rem;
+      margin-bottom:.5rem;
+    }
+
+    .details{
+      display:flex;
+      justify-content:space-around;
+      margin-top:2rem;
+    }
+
+    .details .col{
+      display:flex;
+      align-items:center;
+      gap:.5rem;
+    }
+
+    .details .col i{
+      font-size:1.5rem;
+    }
+
+    .details .col div{
+      text-align:left;
+    }
+
+    .error{
+      display:none;
+      margin-top:1rem;
+      color:#ff4d4d;
+      font-size:1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="search-box">
+      <input type="text" placeholder="शहर का नाम दर्ज करें" spellcheck="false">
+      <button><i class="fas fa-search"></i></button>
+    </div>
+
+    <div class="weather-card">
+      <div class="weather-icon">
+        <img src="https://openweathermap.org/img/wn/04n@2x.png" alt="weather-icon">
+      </div>
+      <h1 class="temp">22°C</h1>
+      <h2 class="city">नई दिल्ली</h2>
+
+      <div class="details">
+        <div class="col">
+          <i class="fas fa-tint"></i>
+          <div>
+            <p class="humidity">50%</p>
+            <p>नमी</p>
+          </div>
+        </div>
+
+        <div class="col">
+          <i class="fas fa-wind"></i>
+          <div>
+            <p class="wind">15 km/h</p>
+            <p>हवा</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="error">कृपया मान्य शहर का नाम दर्ज करें!</p>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const apiKey = "dd0584fd66e21545588f2bdea2c5bd39"; // 👉 https://openweathermap.org से मुफ़्त API-KEY बनाएं
+    const apiUrl   = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+    const searchBox = document.querySelector(".search-box input");
+    const searchBtn = document.querySelector(".search-box button");
+    const weatherIcon = document.querySelector(".weather-icon img");
+    const card = document.querySelector(".weather-card");
+    const error = document.querySelector(".error");
+
+    async function checkWeather(city){
+      const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+      if(response.status == 404){
+        error.style.display = "block";
+        card.style.display = "none";
+      }else{
+        let data = await response.json();
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+        // Weather Icon change
+        const iconCode = data.weather[0].icon;
+        weatherIcon.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+        // Dynamic background
+        if(iconCode.includes("01")) document.body.style.background = "linear-gradient(135deg,#FFE53B 0%, #FF2525 100%)";
+        else if(iconCode.includes("02") || iconCode.includes("03") || iconCode.includes("04"))
+          document.body.style.background = "linear-gradient(135deg,#74ebd5 0%, #ACB6E5 100%)";
+        else if(iconCode.includes("09") || iconCode.includes("10"))
+          document.body.style.background = "linear-gradient(135deg,#5EE7DF 0%, #66A6FF 100%)";
+        else if(iconCode.includes("11"))
+          document.body.style.background = "linear-gradient(135deg,#373B44 0%, #4286f4 100%)";
+        else if(iconCode.includes("13"))
+          document.body.style.background = "linear-gradient(135deg,#E0EAFC 0%, #CFDEF3 100%)";
+        else
+          document.body.style.background = "linear-gradient(135deg,#89f7fe 0%, #66a6ff 100%)";
+
+        card.style.display = "block";
+        error.style.display = "none";
+        card.style.animation = "none";
+        card.offsetHeight; /* trigger reflow */
+        card.style.animation = "fadeIn 1s ease";
+      }
+    }
+
+    searchBtn.addEventListener("click", ()=> checkWeather(searchBox.value));
+    searchBox.addEventListener("keyup", (e)=>{
+      if(e.key === "Enter") checkWeather(searchBox.value);
+    });
+
+    // Default city on load
+    checkWeather("Delhi");
+  </script>
+
+</body>
+</html>
